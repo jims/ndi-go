@@ -4,11 +4,24 @@
 
 package ndi
 
-import "testing"
+import (
+	"os"
+	"path"
+	"testing"
+)
+
+const ndiLibName = "Processing.NDI.Lib.x64.dll"
 
 func TestInitialization(t *testing.T) {
-	if err := LoadAndInitialize("C:\\Program Files\\NewTek\\NewTek NDI SDK\\Bin\\x64\\Processing.NDI.Lib.x64.dll"); err != nil {
+	libDir := os.Getenv("NDI_RUNTIME_DIR_V3")
+	if libDir == "" {
+		t.Fatal("ndi sdk is not installed")
+	}
+
+	if err := LoadAndInitialize(path.Join(libDir, ndiLibName)); err != nil {
 		t.Fatal(err)
 	}
+
+	t.Logf("Version string is: %s", Version())
 	UnloadAndDestroy()
 }

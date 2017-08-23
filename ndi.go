@@ -6,6 +6,7 @@ package ndi
 
 import (
 	"errors"
+	"reflect"
 	"syscall"
 	"unsafe"
 )
@@ -14,6 +15,16 @@ var (
 	ndiSharedLibrary syscall.Handle
 	funcPtrs         *ndiLIBv3
 )
+
+func goString(p uintptr) string {
+	var len int
+	for n := p; *(*byte)(unsafe.Pointer(n)) != 0; n++ {
+		len++
+	}
+
+	h := &reflect.SliceHeader{uintptr(unsafe.Pointer(p)), len, len + 1}
+	return string(*(*[]byte)(unsafe.Pointer(h)))
+}
 
 func LoadAndInitialize(path string) error {
 	var err error
@@ -27,10 +38,14 @@ func LoadAndInitialize(path string) error {
 		return err
 	}
 
-	var ret uintptr
-	if ret, _, err = syscall.Syscall(ndiLoadProc, 0, 0, 0, 0); err != nil {
+	var (
+		ret uintptr
+		eno syscall.Errno
+	)
+
+	if ret, _, eno = syscall.Syscall(ndiLoadProc, 0, 0, 0, 0); eno != 0 {
 		syscall.FreeLibrary(ndiSharedLibrary)
-		return err
+		return eno
 	}
 
 	funcPtrs = (*ndiLIBv3)(unsafe.Pointer(ret))
@@ -38,9 +53,9 @@ func LoadAndInitialize(path string) error {
 		return errors.New("failed to load library procs")
 	}
 
-	if ret, _, err = syscall.Syscall(funcPtrs.NDIlibInitialize, 0, 0, 0, 0); err != nil {
+	if _, _, eno = syscall.Syscall(funcPtrs.NDIlibInitialize, 0, 0, 0, 0); eno != 0 {
 		syscall.FreeLibrary(ndiSharedLibrary)
-		return err
+		return eno
 	}
 
 	if ret == 0 {
@@ -57,6 +72,11 @@ func UnloadAndDestroy() {
 		syscall.Syscall(funcPtrs.NDIlibDestroy, 0, 0, 0, 0)
 	}
 	syscall.FreeLibrary(ndiSharedLibrary)
+}
+
+func Version() string {
+	ret, _, _ := syscall.Syscall(funcPtrs.NDIlibVersion, 0, 0, 0, 0)
+	return goString(ret)
 }
 
 type ndiLIBv3 struct {
