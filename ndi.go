@@ -49,7 +49,7 @@ type SendCreateSettings struct {
 	clockVideo, clockAudio bool
 }
 
-func (p *ObjectPool) NewSendCreate(name, groups string, clockVideo, clockAudio bool) *SendCreateSettings {
+func (p *ObjectPool) NewSendCreateSettings(name, groups string, clockVideo, clockAudio bool) *SendCreateSettings {
 	bName := make([]byte, len(name)+1)
 	copy(bName, name)
 

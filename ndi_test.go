@@ -33,7 +33,7 @@ func TestFrame(t *testing.T) {
 	doInit(t)
 
 	pool := NewObjectPool()
-	settings := pool.NewSendCreate("ndi test", "", false, false)
+	settings := pool.NewSendCreateSettings("ndi test", "", false, false)
 	inst := SendCreate(settings)
 
 	frameData := make([]byte, 1920*1080*4)
