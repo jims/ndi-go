@@ -33,19 +33,18 @@ func TestFrame(t *testing.T) {
 	doInit(t)
 
 	pool := NewObjectPool()
-	settings := pool.NewSendCreateSettings("ndi-go test", "", false, false)
+	settings := pool.NewSendCreateSettings("ndi-go test", "", true, false)
 	inst := SendCreate(settings)
 
 	frameData := make([]byte, 1920*1080*4)
-	frame := VideoFrameV2{
-		FourCC:     FourCCTypeBGRA,
-		Xres:       1920,
-		Yres:       1080,
-		LineStride: 1920 * 4,
-		Data:       &frameData[0],
-	}
+	frame := NewVideoFrameV2()
+	frame.FourCC = FourCCTypeBGRA
+	frame.Xres = 1920
+	frame.Yres = 1080
+	frame.LineStride = 1920 * 4
+	frame.Data = &frameData[0]
 
-	SendSendVideoV2(inst, &frame)
+	SendSendVideoV2(inst, frame)
 
 	SendDestroy(inst)
 	DestroyAndUnload()

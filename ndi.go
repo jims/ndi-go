@@ -50,14 +50,22 @@ type SendCreateSettings struct {
 }
 
 func (p *ObjectPool) NewSendCreateSettings(name, groups string, clockVideo, clockAudio bool) *SendCreateSettings {
-	bName := make([]byte, len(name)+1)
-	copy(bName, name)
+	var bNamePtr *byte
+	if name != "" {
+		bName := make([]byte, len(name)+1)
+		copy(bName, name)
+		bNamePtr = &bName[0]
+	}
 
-	bGroups := make([]byte, len(groups)+1)
-	copy(bGroups, groups)
+	var bGroupsPtr *byte
+	if groups != "" {
+		bGroups := make([]byte, len(groups)+1)
+		copy(bGroups, groups)
+		bGroupsPtr = &bGroups[0]
+	}
 
-	o := &SendCreateSettings{&bName[0], &bGroups[0], clockVideo, clockAudio}
-	p.objects[o] = struct{}{}
+	o := &SendCreateSettings{bNamePtr, bGroupsPtr, clockVideo, clockAudio}
+	p.Register(o)
 	return o
 }
 

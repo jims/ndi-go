@@ -5,7 +5,6 @@
 package main
 
 import (
-	"crypto/rand"
 	"log"
 	"os"
 	"path"
@@ -27,26 +26,39 @@ func main() {
 	}
 
 	pool := ndi.NewObjectPool()
-	settings := pool.NewSendCreateSettings("ndi-go test", "", false, false)
+	settings := pool.NewSendCreateSettings("ndi-go test", "", true, false)
 	inst := ndi.SendCreate(settings)
-
-	frameData := make([]byte, 1920*1080*4)
-	frame := ndi.VideoFrameV2{
-		FourCC:     ndi.FourCCTypeBGRA,
-		Xres:       1920,
-		Yres:       1080,
-		LineStride: 1920 * 4,
-		Data:       &frameData[0],
+	if inst == nil {
+		log.Fatalln("could not create sender")
 	}
 
-	log.Println("Streaming video frame...")
+	frame := ndi.NewVideoFrameV2()
+	frame.FourCC = ndi.FourCCTypeBGRX
+	frame.FrameFormatType = ndi.FrameFormatInterleaved
+	frame.Xres = 1920
+	frame.Yres = 1080
+	frame.LineStride = frame.Xres * 4
+
+	frameData := make([]byte, frame.Xres*frame.Yres*4)
+	frame.Data = &frameData[0]
+
+	log.Println("Streaming video...")
 
 	ticker := time.NewTicker(time.Millisecond * (1000 / 25))
 	for range ticker.C {
-		if _, err := rand.Read(frameData); err != nil {
-			log.Fatalln(err)
+		//if _, err := rand.Read(frameData); err != nil {
+		//	log.Fatalln(err)
+		//}
+
+		for i := 0; i < len(frameData); i++ {
+			if i%4 == 0 {
+				frameData[i] = 0
+			} else {
+				frameData[i] = 128
+			}
 		}
-		ndi.SendSendVideoV2(inst, &frame)
+
+		ndi.SendSendVideoV2(inst, frame)
 	}
 	ticker.Stop()
 
