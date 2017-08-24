@@ -12,7 +12,7 @@ import (
 
 const ndiLibName = "Processing.NDI.Lib.x64.dll"
 
-func TestInitialization(t *testing.T) {
+func doInit(t *testing.T) {
 	libDir := os.Getenv("NDI_RUNTIME_DIR_V3")
 	if libDir == "" {
 		t.Fatal("ndi sdk is not installed")
@@ -21,7 +21,32 @@ func TestInitialization(t *testing.T) {
 	if err := LoadAndInitialize(path.Join(libDir, ndiLibName)); err != nil {
 		t.Fatal(err)
 	}
+}
 
+func TestInitialization(t *testing.T) {
+	doInit(t)
 	t.Logf("Version string is: %s", Version())
-	UnloadAndDestroy()
+	DestroyAndUnload()
+}
+
+func TestFrame(t *testing.T) {
+	doInit(t)
+
+	pool := NewObjectPool()
+	settings := pool.NewSendCreate("ndi test", "", false, false)
+	inst := SendCreate(settings)
+
+	frameData := make([]byte, 1920*1080*4)
+	frame := VideoFrameV2{
+		FourCC:     FourCCTypeBGRA,
+		Xres:       1920,
+		Yres:       1080,
+		LineStride: 1920 * 4,
+		Data:       &frameData[0],
+	}
+
+	SendSendVideoV2(inst, &frame)
+
+	SendDestroy(inst)
+	DestroyAndUnload()
 }
