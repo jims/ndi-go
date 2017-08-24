@@ -91,7 +91,7 @@ func (vf *VideoFrameV2) SetDefault() {
 	vf.Yres = 0
 	vf.FourCC = FourCCTypeUYVA
 	vf.FrameRateN = 30000
-	vf.FrameRateD = 30000
+	vf.FrameRateD = 1001
 	vf.PictureAspectRatio = 0
 	vf.FrameFormatType = FrameFormatProgressive
 	vf.Timecode = math.MaxInt64

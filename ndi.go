@@ -149,9 +149,9 @@ func IsSupportedCPU() bool {
 	return ret != 0
 }
 
-type SendInstance int
+type SendInstance struct{}
 
-func SendCreate(settings *SendCreateSettings) *SendInstance {
+func NewSendInstance(settings *SendCreateSettings) *SendInstance {
 	ret, _, eno := syscall.Syscall(funcPtrs.NDIlibSendCreate, 1, uintptr(unsafe.Pointer(settings)), 0, 0)
 	if eno != 0 {
 		panic(eno)
@@ -159,14 +159,22 @@ func SendCreate(settings *SendCreateSettings) *SendInstance {
 	return (*SendInstance)(unsafe.Pointer(ret))
 }
 
-func SendDestroy(inst *SendInstance) {
+func (inst *SendInstance) Destroy() {
 	if _, _, eno := syscall.Syscall(funcPtrs.NDIlibSendDestroy, 1, uintptr(unsafe.Pointer(inst)), 0, 0); eno != 0 {
 		panic(eno)
 	}
 }
 
-func SendSendVideoV2(inst *SendInstance, frame *VideoFrameV2) {
+func (inst *SendInstance) SendVideoV2(frame *VideoFrameV2) {
 	if _, _, eno := syscall.Syscall(funcPtrs.NDIlibSendSendVideoV2, 2, uintptr(unsafe.Pointer(inst)), uintptr(unsafe.Pointer(frame)), 0); eno != 0 {
 		panic(eno)
 	}
+}
+
+func (inst *SendInstance) GetNumConnections(timeoutInMs uint32) int {
+	ret, _, eno := syscall.Syscall(funcPtrs.NDIlibSendGetNoConnections, 2, uintptr(unsafe.Pointer(inst)), uintptr(timeoutInMs), 0)
+	if eno != 0 {
+		panic(eno)
+	}
+	return int(ret)
 }

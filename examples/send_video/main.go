@@ -5,17 +5,20 @@
 package main
 
 import (
+	"crypto/rand"
 	"log"
 	"os"
 	"path"
-	"time"
+	"runtime"
 
-	ndi "github.com/diskett-io/ndi-go"
+	"github.com/diskett-io/ndi-go"
 )
 
 const ndiLibName = "Processing.NDI.Lib.x64.dll"
 
 func main() {
+	runtime.LockOSThread()
+
 	libDir := os.Getenv("NDI_RUNTIME_DIR_V3")
 	if libDir == "" {
 		log.Fatalln("ndi sdk is not installed")
@@ -27,7 +30,7 @@ func main() {
 
 	pool := ndi.NewObjectPool()
 	settings := pool.NewSendCreateSettings("ndi-go test", "", true, false)
-	inst := ndi.SendCreate(settings)
+	inst := ndi.NewSendInstance(settings)
 	if inst == nil {
 		log.Fatalln("could not create sender")
 	}
@@ -35,8 +38,8 @@ func main() {
 	frame := ndi.NewVideoFrameV2()
 	frame.FourCC = ndi.FourCCTypeBGRX
 	frame.FrameFormatType = ndi.FrameFormatInterleaved
-	frame.Xres = 1920
-	frame.Yres = 1080
+	frame.Xres = 720
+	frame.Yres = 480
 	frame.LineStride = frame.Xres * 4
 
 	frameData := make([]byte, frame.Xres*frame.Yres*4)
@@ -44,24 +47,26 @@ func main() {
 
 	log.Println("Streaming video...")
 
-	ticker := time.NewTicker(time.Millisecond * (1000 / 25))
-	for range ticker.C {
-		//if _, err := rand.Read(frameData); err != nil {
-		//	log.Fatalln(err)
-		//}
-
-		for i := 0; i < len(frameData); i++ {
-			if i%4 == 0 {
-				frameData[i] = 0
-			} else {
-				frameData[i] = 128
-			}
+	for {
+		if _, err := rand.Read(frameData); err != nil {
+			log.Fatalln(err)
 		}
 
-		ndi.SendSendVideoV2(inst, frame)
-	}
-	ticker.Stop()
+		//log.Println(inst.GetNumConnections(0))
 
-	ndi.SendDestroy(inst)
+		/*
+			for i, _ := range frameData {
+				if i%4 == 0 {
+					frameData[i] = 255
+				} else {
+					frameData[i] = 128
+				}
+			}
+		*/
+
+		inst.SendVideoV2(frame)
+	}
+
+	inst.Destroy()
 	ndi.DestroyAndUnload()
 }
