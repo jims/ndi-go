@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"runtime"
 
 	"github.com/diskett-io/ndi-go"
 )
@@ -19,9 +18,7 @@ const (
 	scanTimeout = 5000
 )
 
-func main() {
-	runtime.LockOSThread()
-
+func initializeNDI() {
 	libDir := os.Getenv("NDI_RUNTIME_DIR_V3")
 	if libDir == "" {
 		log.Fatalln("ndi sdk is not installed")
@@ -30,6 +27,10 @@ func main() {
 	if err := ndi.LoadAndInitialize(path.Join(libDir, ndiLibName)); err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func main() {
+	initializeNDI()
 
 	pool := ndi.NewObjectPool()
 	settings := pool.NewFindCreateSettings(true, "", "")

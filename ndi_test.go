@@ -31,6 +31,7 @@ func TestInitialization(t *testing.T) {
 
 func TestFrame(t *testing.T) {
 	doInit(t)
+	defer DestroyAndUnload()
 
 	pool := NewObjectPool()
 	settings := pool.NewSendCreateSettings("ndi-go test", "", true, false)
@@ -45,7 +46,5 @@ func TestFrame(t *testing.T) {
 	frame.Data = &frameData[0]
 
 	inst.SendVideoV2(frame)
-
 	inst.Destroy()
-	DestroyAndUnload()
 }
