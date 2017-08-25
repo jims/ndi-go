@@ -22,6 +22,10 @@ var (
 	funcPtrs         *ndiLIBv3
 )
 
+type Tally struct {
+	OnProgram, OnPreview bool
+}
+
 type ObjectPool struct {
 	objects map[interface{}]struct{}
 }
@@ -67,6 +71,34 @@ func (p *ObjectPool) NewSendCreateSettings(name, groups string, clockVideo, cloc
 	o := &SendCreateSettings{bNamePtr, bGroupsPtr, clockVideo, clockAudio}
 	p.Register(o)
 	return o
+}
+
+type FindCreateSettings struct {
+	showLocalSources bool
+	groups, extraIPs *byte
+}
+
+func (p *ObjectPool) NewFindCreateSettings(showLocalSources bool, groups, ips string) *FindCreateSettings {
+	var bGroupsPtr *byte
+	if groups != "" {
+		bGroups := make([]byte, len(groups)+1)
+		copy(bGroups, groups)
+		bGroupsPtr = &bGroups[0]
+	}
+
+	var bIPsPtr *byte
+	if ips != "" {
+		bIPs := make([]byte, len(ips)+1)
+		copy(bIPs, ips)
+		bIPsPtr = &bIPs[0]
+	}
+
+	o := &FindCreateSettings{showLocalSources, bGroupsPtr, bIPsPtr}
+	p.Register(o)
+	return o
+}
+
+type RecvCreateSettings struct {
 }
 
 func LoadAndInitialize(path string) error {
@@ -147,34 +179,4 @@ func IsSupportedCPU() bool {
 		panic(eno)
 	}
 	return ret != 0
-}
-
-type SendInstance struct{}
-
-func NewSendInstance(settings *SendCreateSettings) *SendInstance {
-	ret, _, eno := syscall.Syscall(funcPtrs.NDIlibSendCreate, 1, uintptr(unsafe.Pointer(settings)), 0, 0)
-	if eno != 0 {
-		panic(eno)
-	}
-	return (*SendInstance)(unsafe.Pointer(ret))
-}
-
-func (inst *SendInstance) Destroy() {
-	if _, _, eno := syscall.Syscall(funcPtrs.NDIlibSendDestroy, 1, uintptr(unsafe.Pointer(inst)), 0, 0); eno != 0 {
-		panic(eno)
-	}
-}
-
-func (inst *SendInstance) SendVideoV2(frame *VideoFrameV2) {
-	if _, _, eno := syscall.Syscall(funcPtrs.NDIlibSendSendVideoV2, 2, uintptr(unsafe.Pointer(inst)), uintptr(unsafe.Pointer(frame)), 0); eno != 0 {
-		panic(eno)
-	}
-}
-
-func (inst *SendInstance) GetNumConnections(timeoutInMs uint32) int {
-	ret, _, eno := syscall.Syscall(funcPtrs.NDIlibSendGetNoConnections, 2, uintptr(unsafe.Pointer(inst)), uintptr(timeoutInMs), 0)
-	if eno != 0 {
-		panic(eno)
-	}
-	return int(ret)
 }
