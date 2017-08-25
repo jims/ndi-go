@@ -13,6 +13,14 @@ type Source struct {
 	name, address *byte
 }
 
+func (s *Source) Name() string {
+	return goStringFromCString(uintptr(unsafe.Pointer(s.name)))
+}
+
+func (s *Source) Address() string {
+	return goStringFromCString(uintptr(unsafe.Pointer(s.address)))
+}
+
 type FindInstance struct{}
 
 func NewFindInstanceV2(settings *FindCreateSettings) *FindInstance {
@@ -47,7 +55,7 @@ func (inst *FindInstance) GetCurrentSources() []*Source {
 	}
 
 	sources := make([]*Source, numSources)
-	for i := uint32(0); i < numSources; i++ {
+	for i, _ := range sources {
 		sources[i] = (*Source)(unsafe.Pointer(ret))
 		ret++
 	}

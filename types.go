@@ -5,6 +5,7 @@
 package ndi
 
 import (
+	"fmt"
 	"math"
 	"reflect"
 	"unsafe"
@@ -18,6 +19,14 @@ func goStringFromConst(p uintptr) string {
 
 	h := &reflect.SliceHeader{uintptr(unsafe.Pointer(p)), len, len + 1}
 	return string(*(*[]byte)(unsafe.Pointer(h)))
+}
+
+func goStringFromCString(p uintptr) string {
+	s := ""
+	for ; *(*byte)(unsafe.Pointer(p)) != 0; p++ {
+		s = fmt.Sprintf("%s%c", s, *(*byte)(unsafe.Pointer(p)))
+	}
+	return s
 }
 
 type FrameFormat int
