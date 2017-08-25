@@ -98,9 +98,6 @@ func (p *ObjectPool) NewFindCreateSettings(showLocalSources bool, groups, ips st
 	return o
 }
 
-type RecvCreateSettings struct {
-}
-
 func LoadAndInitialize(path string) error {
 	if ndiSharedLibrary != 0 {
 		return alreadyLoadedErr
