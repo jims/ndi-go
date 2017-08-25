@@ -55,9 +55,9 @@ func (inst *FindInstance) GetCurrentSources() []*Source {
 	}
 
 	sources := make([]*Source, numSources)
-	for i, _ := range sources {
+	for i, s := range sources {
 		sources[i] = (*Source)(unsafe.Pointer(ret))
-		ret++
+		ret += unsafe.Sizeof(*s)
 	}
 	return sources
 }

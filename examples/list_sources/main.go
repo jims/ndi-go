@@ -17,7 +17,6 @@ import (
 const (
 	ndiLibName  = "Processing.NDI.Lib.x64.dll"
 	scanTimeout = 5000
-	maxRetries  = 10
 )
 
 func main() {
@@ -39,20 +38,27 @@ func main() {
 		log.Fatalln("could not create finder")
 	}
 
+	defer func() {
+		inst.Destroy()
+		ndi.DestroyAndUnload()
+	}()
+
 	fmt.Println("Searching for NDI sources...")
 
-	for n := 0; n < maxRetries; n++ {
+	listed := make(map[string]struct{})
+	for {
 		inst.WaitForSources(scanTimeout)
 		source := inst.GetCurrentSources()
 
-		if len(source) > 0 {
-			for _, source := range source {
-				fmt.Printf("Source: %s, Address: %s\n", source.Name(), source.Address())
+		for _, source := range source {
+			name := source.Name()
+			addr := source.Address()
+
+			key := name + addr
+			if _, ok := listed[key]; !ok {
+				fmt.Printf("Source: %s, Address: %s\n", name, addr)
+				listed[key] = struct{}{}
 			}
-			break
 		}
 	}
-
-	inst.Destroy()
-	ndi.DestroyAndUnload()
 }

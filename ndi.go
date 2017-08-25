@@ -79,24 +79,21 @@ type FindCreateSettings struct {
 }
 
 func (p *ObjectPool) NewFindCreateSettings(showLocalSources bool, groups, ips string) *FindCreateSettings {
-	/*
-		var bGroupsPtr *byte
-		if groups != "" {
-			bGroups := make([]byte, len(groups)+1)
-			copy(bGroups, groups)
-			bGroupsPtr = &bGroups[0]
-		}
+	var bGroupsPtr *byte
+	if groups != "" {
+		bGroups := make([]byte, len(groups)+1)
+		copy(bGroups, groups)
+		bGroupsPtr = &bGroups[0]
+	}
 
-		var bIPsPtr *byte
-		if ips != "" {
-			bIPs := make([]byte, len(ips)+1)
-			copy(bIPs, ips)
-			bIPsPtr = &bIPs[0]
-		}
+	var bIPsPtr *byte
+	if ips != "" {
+		bIPs := make([]byte, len(ips)+1)
+		copy(bIPs, ips)
+		bIPsPtr = &bIPs[0]
+	}
 
-		o := &FindCreateSettings{showLocalSources, bGroupsPtr, bIPsPtr}
-	*/
-	o := &FindCreateSettings{true, nil, nil}
+	o := &FindCreateSettings{showLocalSources, bGroupsPtr, bIPsPtr}
 	p.Register(o)
 	return o
 }
