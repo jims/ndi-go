@@ -29,7 +29,7 @@ func goStringFromCString(p uintptr) string {
 	return s
 }
 
-type FrameFormat int
+type FrameFormat int32
 
 const (
 	FrameFormatInterleaved FrameFormat = iota //A fielded frame with the field 0 being on the even lines and field 1 being on the odd lines.
@@ -45,7 +45,7 @@ const (
 	SendTimecodeEmpty      int64 = 0
 )
 
-type RecvBandwidth int
+type RecvBandwidth int32
 
 const (
 	RecvBandwidthMetadataOnly RecvBandwidth = -10 //Receive metadata.
@@ -67,19 +67,19 @@ var (
 	FourCCTypeUYVA = [4]byte{'U', 'Y', 'V', 'A'}
 )
 
-type RecvColorFormat int
+type RecvColorFormat int32
 
 const (
-	RecvColorFormatBGRXBGRA = 0 //No alpha channel: BGRX, Alpha channel: BGRA
-	RecvColorFormatUYVYBGRA = 1 //No alpha channel: UYVY, Alpha channel: BGRA
-	RecvColorFormatRGBXRGBA = 2 //No alpha channel: RGBX, Alpha channel: RGBA
-	RecvColorFormatUYVYRGBA = 3 //No alpha channel: UYVY, Alpha channel: RGBA
+	RecvColorFormatBGRXBGRA RecvColorFormat = 0 //No alpha channel: BGRX, Alpha channel: BGRA
+	RecvColorFormatUYVYBGRA RecvColorFormat = 1 //No alpha channel: UYVY, Alpha channel: BGRA
+	RecvColorFormatRGBXRGBA RecvColorFormat = 2 //No alpha channel: RGBX, Alpha channel: RGBA
+	RecvColorFormatUYVYRGBA RecvColorFormat = 3 //No alpha channel: UYVY, Alpha channel: RGBA
 
 	//Read the SDK documentation to understand the pros and cons of this format.
-	RecvColorFormatFastest = 100
+	RecvColorFormatFastest RecvColorFormat = 100
 )
 
-type FrameType int
+type FrameType int32
 
 //An enumeration to specify the type of a packet returned by the functions
 const (
@@ -104,12 +104,12 @@ func NewVideoFrameV2() *VideoFrameV2 {
 
 //This describes a video frame.
 type VideoFrameV2 struct {
-	Xres, Yres int     //The resolution of this frame.
+	Xres, Yres int32   //The resolution of this frame.
 	FourCC     [4]byte //What FourCC this is with. This can be two values.
 
 	//What is the frame-rate of this frame.
 	//For instance NTSC is 30000,1001 = 30000/1001 = 29.97fps.
-	FrameRateN, FrameRateD int
+	FrameRateN, FrameRateD int32
 
 	//What is the picture aspect ratio of this frame.
 	//For instance 16.0/9.0 = 1.778 is 16:9 video
@@ -126,7 +126,7 @@ type VideoFrameV2 struct {
 	Data *byte
 
 	//The inter line stride of the video data, in bytes.
-	LineStride int
+	LineStride int32
 
 	//Per frame metadata for this frame. This is a NULL terminated UTF8 string that should be
 	//in XML format. If you do not want any metadata then you may specify NULL here.
@@ -162,10 +162,10 @@ func NewAudioFrameV2() *AudioFrameV2 {
 type AudioFrameV2 struct {
 	SampleRate, //The sample-rate of this buffer.
 	NumChannels, //The number of audio channels.
-	NumSamples int //The number of audio samples per channel.
+	NumSamples int32 //The number of audio samples per channel.
 	Timecode      int64    //The timecode of this frame in 100ns intervals.
 	Data          *float32 //The audio data
-	ChannelStride int      //The inter channel stride of the audio channels, in bytes.
+	ChannelStride int32    //The inter channel stride of the audio channels, in bytes.
 
 	//Per frame metadata for this frame. This is a NULL terminated UTF8 string that should be
 	//in XML format. If you do not want any metadata then you may specify NULL here.
@@ -230,7 +230,7 @@ func NewMetadataFrame() *MetadataFrame {
 type MetadataFrame struct {
 	//The length of the string in UTF8 characters. This includes the NULL terminating character.
 	//If this is 0, then the length is assume to be the length of a null terminated string.
-	Length int
+	Length int32
 
 	Timecode int64 //The timecode of this frame in 100ns intervals.
 	Data     *byte //The metadata as a UTF8 XML string. This is a NULL terminated string.

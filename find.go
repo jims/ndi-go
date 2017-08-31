@@ -14,10 +14,16 @@ type Source struct {
 }
 
 func (s *Source) Name() string {
+	if s.name == nil {
+		return ""
+	}
 	return goStringFromCString(uintptr(unsafe.Pointer(s.name)))
 }
 
 func (s *Source) Address() string {
+	if s.address == nil {
+		return ""
+	}
 	return goStringFromCString(uintptr(unsafe.Pointer(s.address)))
 }
 

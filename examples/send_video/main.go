@@ -46,6 +46,11 @@ func main() {
 	frameData := make([]byte, frame.Xres*frame.Yres*4)
 	frame.Data = &frameData[0]
 
+	defer func() {
+		inst.Destroy()
+		ndi.DestroyAndUnload()
+	}()
+
 	log.Println("Streaming video...")
 
 	for {
@@ -53,21 +58,6 @@ func main() {
 			log.Fatalln(err)
 		}
 
-		//log.Println(inst.GetNumConnections(0))
-
-		/*
-			for i, _ := range frameData {
-				if i%4 == 0 {
-					frameData[i] = 255
-				} else {
-					frameData[i] = 128
-				}
-			}
-		*/
-
 		inst.SendVideoV2(frame)
 	}
-
-	inst.Destroy()
-	ndi.DestroyAndUnload()
 }

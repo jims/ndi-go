@@ -93,7 +93,12 @@ func (p *ObjectPool) NewFindCreateSettings(showLocalSources bool, groups, ips st
 		bIPsPtr = &bIPs[0]
 	}
 
-	o := &FindCreateSettings{showLocalSources, bGroupsPtr, bIPsPtr}
+	o := &FindCreateSettings{
+		showLocalSources: showLocalSources,
+		groups:           bGroupsPtr,
+		extraIPs:         bIPsPtr,
+	}
+
 	p.Register(o)
 	return o
 }
