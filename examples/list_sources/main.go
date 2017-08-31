@@ -46,19 +46,36 @@ func main() {
 
 	fmt.Println("Searching for NDI sources...")
 
-	listed := make(map[string]struct{})
+	currentSources := make(map[string]string)
 	for {
 		inst.WaitForSources(scanTimeout)
-		source := inst.GetCurrentSources()
+		sources := inst.GetCurrentSources()
 
-		for _, source := range source {
-			name := source.Name()
-			addr := source.Address()
+		var newListing bool
+		if len(currentSources) != len(sources) {
+			newListing = true
+		} else {
+			for _, source := range sources {
+				name := source.Name()
+				addr := source.Address()
 
-			key := name + addr
-			if _, ok := listed[key]; !ok {
-				fmt.Printf("Source: %s, Address: %s\n", name, addr)
-				listed[key] = struct{}{}
+				if n, ok := currentSources[addr]; !ok || n != name {
+					newListing = true
+					break
+				}
+			}
+		}
+
+		if newListing {
+			fmt.Printf("%d available source(s):\n", len(sources))
+			currentSources = make(map[string]string)
+
+			for _, source := range sources {
+				name := source.Name()
+				addr := source.Address()
+
+				currentSources[addr] = name
+				fmt.Printf("Name: %s, Address: %s\n", name, addr)
 			}
 		}
 	}
