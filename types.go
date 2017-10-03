@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"syscall"
 	"unsafe"
 )
 
@@ -27,6 +28,14 @@ func goStringFromCString(p uintptr) string {
 		s = fmt.Sprintf("%s%c", s, *(*byte)(unsafe.Pointer(p)))
 	}
 	return s
+}
+
+type Error struct {
+	syscall.Errno
+}
+
+func (e *Error) Timeout() bool {
+	return e.Errno.Timeout() || uintptr(e.Errno) == 1460
 }
 
 type FrameFormat int32

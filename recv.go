@@ -45,10 +45,6 @@ func (inst *RecvInstance) SendMetadata(mf *MetadataFrame) bool {
 	return ret != 0
 }
 
-type RecvError struct {
-	syscall.Errno
-}
-
 func (inst *RecvInstance) CaptureV2(vf *VideoFrameV2, af *AudioFrameV2, mf *MetadataFrame, timeoutInMs uint32) (FrameType, error) {
 	ret, _, eno := syscall.Syscall6(
 		funcPtrs.NDIlibRecvCaptureV2,
@@ -61,11 +57,10 @@ func (inst *RecvInstance) CaptureV2(vf *VideoFrameV2, af *AudioFrameV2, mf *Meta
 		0,
 	)
 
-	ft := FrameType(ret)
 	if eno != 0 {
-		return ft, RecvError{eno}
+		return 0, Error{eno}
 	}
-	return ft, nil
+	return FrameType(ret), nil
 }
 
 func (inst *RecvInstance) FreeVideoV2(vf *VideoFrameV2) {
@@ -91,7 +86,7 @@ func (inst *RecvInstance) FreeMetadataV2(mf *MetadataFrame) {
 func (inst *RecvInstance) GetNumConnections(timeoutInMs uint32) (int, error) {
 	ret, _, eno := syscall.Syscall(funcPtrs.NDIlibRecvGetNoConnections, 2, uintptr(unsafe.Pointer(inst)), uintptr(timeoutInMs), 0)
 	if eno != 0 {
-		return int(ret), RecvError{eno}
+		return 0, Error{eno}
 	}
 	return int(ret), nil
 }
