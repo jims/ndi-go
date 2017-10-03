@@ -45,7 +45,11 @@ func (inst *RecvInstance) SendMetadata(mf *MetadataFrame) bool {
 	return ret != 0
 }
 
-func (inst *RecvInstance) CaptureV2(vf *VideoFrameV2, af *AudioFrameV2, mf *MetadataFrame, timeoutInMs uint32) FrameType {
+type RecvError struct {
+	syscall.Errno
+}
+
+func (inst *RecvInstance) CaptureV2(vf *VideoFrameV2, af *AudioFrameV2, mf *MetadataFrame, timeoutInMs uint32) (FrameType, error) {
 	ret, _, eno := syscall.Syscall6(
 		funcPtrs.NDIlibRecvCaptureV2,
 		5,
@@ -57,10 +61,11 @@ func (inst *RecvInstance) CaptureV2(vf *VideoFrameV2, af *AudioFrameV2, mf *Meta
 		0,
 	)
 
+	ft := FrameType(ret)
 	if eno != 0 {
-		panic(eno)
+		return ft, RecvError{eno}
 	}
-	return FrameType(ret)
+	return ft, nil
 }
 
 func (inst *RecvInstance) FreeVideoV2(vf *VideoFrameV2) {
@@ -83,10 +88,10 @@ func (inst *RecvInstance) FreeMetadataV2(mf *MetadataFrame) {
 
 //Is this receiver currently connected to a source on the other end, or has the source not yet been found or is no longe ronline.
 //This will normally return 0 or 1.
-func (inst *RecvInstance) GetNumConnections(timeoutInMs uint32) int {
+func (inst *RecvInstance) GetNumConnections(timeoutInMs uint32) (int, error) {
 	ret, _, eno := syscall.Syscall(funcPtrs.NDIlibRecvGetNoConnections, 2, uintptr(unsafe.Pointer(inst)), uintptr(timeoutInMs), 0)
 	if eno != 0 {
-		panic(eno)
+		return int(ret), RecvError{eno}
 	}
-	return int(ret)
+	return int(ret), nil
 }

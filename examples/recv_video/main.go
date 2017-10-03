@@ -92,7 +92,8 @@ func main() {
 		af.SetDefault()
 		mf.SetDefault()
 
-		switch recvInst.CaptureV2(nil, nil, nil, 1000) {
+		ft, _ := recvInst.CaptureV2(nil, nil, nil, 1000)
+		switch ft {
 		case ndi.FrameTypeNone:
 			fmt.Println("FrameTypeNone")
 		case ndi.FrameTypeVideo:

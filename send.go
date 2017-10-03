@@ -32,13 +32,17 @@ func (inst *SendInstance) SendVideoV2(frame *VideoFrameV2) {
 	}
 }
 
+type SendError struct {
+	syscall.Errno
+}
+
 //Get the current number of receivers connected to this source. This can be used to avoid even rendering when nothing is connected to the video source.
 //which can significantly improve the efficiency if you want to make a lot of sources available on the network. If you specify a timeout that is not
 //0 then it will wait until there are connections for this amount of time.
-func (inst *SendInstance) GetNumConnections(timeoutInMs uint32) int {
+func (inst *SendInstance) GetNumConnections(timeoutInMs uint32) (int, error) {
 	ret, _, eno := syscall.Syscall(funcPtrs.NDIlibSendGetNoConnections, 2, uintptr(unsafe.Pointer(inst)), uintptr(timeoutInMs), 0)
 	if eno != 0 {
-		panic(eno)
+		return int(ret), SendError{eno}
 	}
-	return int(ret)
+	return int(ret), nil
 }

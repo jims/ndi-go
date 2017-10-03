@@ -43,13 +43,17 @@ func (inst *FindInstance) Destroy() {
 	}
 }
 
+type FindError struct {
+	syscall.Errno
+}
+
 //This will allow you to wait until the number of online sources have changed.
-func (inst *FindInstance) WaitForSources(timeoutInMs uint32) int {
+func (inst *FindInstance) WaitForSources(timeoutInMs uint32) (int, error) {
 	ret, _, eno := syscall.Syscall(funcPtrs.NDIlibFindWaitForSources, 2, uintptr(unsafe.Pointer(inst)), uintptr(timeoutInMs), 0)
 	if eno != 0 {
-		panic(eno)
+		return int(ret), FindError{eno}
 	}
-	return int(ret)
+	return int(ret), nil
 }
 
 //This function will recover the current set of sources (i.e. the ones that exist right this second).
