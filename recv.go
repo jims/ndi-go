@@ -45,8 +45,8 @@ func (inst *RecvInstance) SendMetadata(mf *MetadataFrame) bool {
 	return ret != 0
 }
 
-func (inst *RecvInstance) CaptureV2(vf *VideoFrameV2, af *AudioFrameV2, mf *MetadataFrame, timeoutInMs uint32) (FrameType, error) {
-	ret, _, eno := syscall.Syscall6(
+func (inst *RecvInstance) CaptureV2(vf *VideoFrameV2, af *AudioFrameV2, mf *MetadataFrame, timeoutInMs uint32) FrameType {
+	ret, _, _ := syscall.Syscall6(
 		funcPtrs.NDIlibRecvCaptureV2,
 		5,
 		uintptr(unsafe.Pointer(inst)),
@@ -57,10 +57,7 @@ func (inst *RecvInstance) CaptureV2(vf *VideoFrameV2, af *AudioFrameV2, mf *Meta
 		0,
 	)
 
-	if eno != 0 {
-		return 0, Error{eno}
-	}
-	return FrameType(ret), nil
+	return FrameType(ret)
 }
 
 func (inst *RecvInstance) FreeVideoV2(vf *VideoFrameV2) {
