@@ -10,13 +10,13 @@ import (
 	"os"
 	"path"
 
-	"github.com/diskett-io/ndi-go"
+	"github.com/FlowingSPDG/ndi-go"
 )
 
 const ndiLibName = "Processing.NDI.Lib.x64.dll"
 
 func initializeNDI() {
-	libDir := os.Getenv("NDI_RUNTIME_DIR_V3")
+	libDir := os.Getenv("NDI_RUNTIME_DIR_V5")
 	if libDir == "" {
 		log.Fatalln("ndi sdk is not installed")
 	}

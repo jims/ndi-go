@@ -19,7 +19,7 @@ var (
 
 var (
 	ndiSharedLibrary syscall.Handle
-	funcPtrs         *ndiLIBv3
+	funcPtrs         *ndiLIBv5
 )
 
 type Tally struct {
@@ -131,7 +131,7 @@ func LoadAndInitialize(path string) error {
 		return eno
 	}
 
-	funcPtrs = (*ndiLIBv3)(unsafe.Pointer(ret))
+	funcPtrs = (*ndiLIBv5)(unsafe.Pointer(ret))
 	if funcPtrs == nil {
 		syscall.FreeLibrary(ndiSharedLibrary)
 		ndiSharedLibrary = 0

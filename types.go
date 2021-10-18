@@ -252,7 +252,7 @@ func (mf *MetadataFrame) SetDefault() {
 }
 
 //This is a private struct!
-type ndiLIBv3 struct {
+type ndiLIBv5 struct {
 	// V1.5
 	NDIlibInitialize, //bool(*NDIlib_initialize)(void)
 	NDIlibDestroy, //void(*NDIlib_destroy)(void)
@@ -343,5 +343,42 @@ type ndiLIBv3 struct {
 	NDIlibRecvRecordingIsRecording, //bool(*NDIlib_recv_recording_is_recording)(NDIlib_recv_instance_t p_instance)
 	NDIlibRecvRecordingGetFilename, //const char*(*NDIlib_recv_recording_get_filename)(NDIlib_recv_instance_t p_instance)
 	NDIlibRecvRecordingGetError, //const char*(*NDIlib_recv_recording_get_error)(NDIlib_recv_instance_t p_instance)
-	NDIlibRecvRecordingGetTimes uintptr //bool(*NDIlib_recv_recording_get_times)(NDIlib_recv_instance_t p_instance, NDIlib_recv_recording_time_t* p_times)
+	NDIlibRecvRecordingGetTimes, //bool(*NDIlib_recv_recording_get_times)(NDIlib_recv_instance_t p_instance, NDIlib_recv_recording_time_t* p_times)
+
+	// V3.1
+	NDIlibRecvInstanceT, //NDIlib_recv_instance_t(*recv_create_v3)(const NDIlib_recv_create_v3_t* p_create_settings)
+
+	// V3.5
+	NDIlibRecvConnect, //void(*recv_connect)(NDIlib_recv_instance_t p_instance, const NDIlib_source_t* p_src)
+
+	// V3.6
+	NDIlibFramesyncInstanceT, //NDIlib_framesync_instance_t(*framesync_create)(NDIlib_recv_instance_t p_receiver)
+	NDIlibFramesyncDestroy, // void(*framesync_destroy)(NDIlib_framesync_instance_t p_instance)
+	NDIlibFramesyncCaptureAudio, //void(*framesync_capture_audio)(NDIlib_framesync_instance_t p_instance, NDIlib_audio_frame_v2_t* p_audio_data, int sample_rate, int no_channels, int no_samples)
+	NDIlibFramesyncFreeAudio, //void(*framesync_free_audio)(NDIlib_framesync_instance_t p_instance, NDIlib_audio_frame_v2_t* p_audio_data)
+	NDIlibFramesyncCaptureVideo, //void(*framesync_capture_video)(NDIlib_framesync_instance_t p_instance, NDIlib_video_frame_v2_t* p_video_data, NDIlib_frame_format_type_e field_type)
+	NDIlibFramesyncFreeVideo, //void(*framesync_free_video)(NDIlib_framesync_instance_t p_instance, NDIlib_video_frame_v2_t* p_video_data)
+	NDIlibUtilSendSendAudioInterleaved32s, //void(*util_send_send_audio_interleaved_32s)(NDIlib_send_instance_t p_instance, const NDIlib_audio_frame_interleaved_32s_t* p_audio_data)
+	NDIlibUtilAudioToInterleaved32sV2, //void(*util_audio_to_interleaved_32s_v2)(const NDIlib_audio_frame_v2_t* p_src, NDIlib_audio_frame_interleaved_32s_t* p_dst)
+	NDIlibUtilAudioFromInterleaved32sV2, //void(*util_audio_from_interleaved_32s_v2)(const NDIlib_audio_frame_interleaved_32s_t* p_src, NDIlib_audio_frame_v2_t* p_dst)
+
+	// V3.8
+	NDIlibSourceTv38, //const NDIlib_source_t* (*send_get_source_name)(NDIlib_send_instance_t p_instance)
+
+	// V4.0
+	NDIlibSendSendAudioV3, //void(*send_send_audio_v3)(NDIlib_send_instance_t p_instance, const NDIlib_audio_frame_v3_t* p_audio_data)
+	NDIlibUtilV210ToP216, //void(*util_V210_to_P216)(const NDIlib_video_frame_v2_t* p_src_v210, NDIlib_video_frame_v2_t* p_dst_p216)
+	NDIlibUtilP216ToV210, //void(*util_P216_to_V210)(const NDIlib_video_frame_v2_t* p_src_p216, NDIlib_video_frame_v2_t* p_dst_v210)
+
+	// V4.1
+	NDIlibRoutingGetNoConnections, //int (*routing_get_no_connections)(NDIlib_routing_instance_t p_instance, uint32_t timeout_in_ms)
+	NDIlibSourceT, //const NDIlib_source_t* (*routing_get_source_name)(NDIlib_routing_instance_t p_instance)
+	NDIlibFrameTypeE, // NDIlib_frame_type_e(*recv_capture_v3)(NDIlib_recv_instance_t p_instance, NDIlib_video_frame_v2_t* p_video_data, NDIlib_audio_frame_v3_t* p_audio_data, NDIlib_metadata_frame_t* p_metadata, uint32_t timeout_in_ms);             // The amount of time in milliseconds to wait for data
+	NDIlibRecvFreeAudioV3, //void(*recv_free_audio_v3)(NDIlib_recv_instance_t p_instance, const NDIlib_audio_frame_v3_t* p_audio_data)
+	NDIlibFramesyncCaptureAudioV2, // void(*framesync_capture_audio_v2)(NDIlib_framesync_instance_t p_instance, NDIlib_audio_frame_v3_t* p_audio_data, int sample_rate, int no_channels, int no_samples)
+	NDIlibFramesyncFreeAudioV2, // void(*framesync_free_audio_v2)(NDIlib_framesync_instance_t p_instance, NDIlib_audio_frame_v3_t* p_audio_data)
+	NDIlibFramesyncAudioQueueDepth, // int(*framesync_audio_queue_depth)(NDIlib_framesync_instance_t p_instance)
+
+	// v4.5
+	NDIlibRecvPtzExposureManualV2 uintptr //bool(*recv_ptz_exposure_manual_v2)(NDIlib_framesync_instance_t p_instance, const float iris, const float gain, const float shutter_speed)
 }

@@ -9,17 +9,18 @@ import (
 	"log"
 	"os"
 	"path"
+	"time"
 
-	"github.com/diskett-io/ndi-go"
+	"github.com/FlowingSPDG/ndi-go"
 )
 
 const (
 	ndiLibName    = "Processing.NDI.Lib.x64.dll"
-	ndiSourceName = "ndi-go test"
+	ndiSourceName = "FL-9900K (Test Pattern)"
 )
 
 func initializeNDI() {
-	libDir := os.Getenv("NDI_RUNTIME_DIR_V3")
+	libDir := os.Getenv("NDI_RUNTIME_DIR_V5")
 	if libDir == "" {
 		log.Fatalln("ndi sdk is not installed")
 	}
@@ -45,8 +46,11 @@ func main() {
 	fmt.Println("Searching for NDI sources...")
 
 	for recvInst == nil {
-		for _, source := range findInst.GetCurrentSources() {
+		srcs := findInst.GetCurrentSources()
+		log.Printf("Got %d sources\n", len(srcs))
+		for i, source := range srcs {
 			name := source.Name()
+			log.Printf("srcs[%d] : %s %s", i, name, source.Address())
 
 			if name == ndiSourceName {
 				addr := source.Address()
@@ -60,13 +64,14 @@ func main() {
 					continue
 				}
 
-				fmt.Printf("Connected to %s, %s\n", name, addr)
+				log.Printf("Connected to %s, %s\n", name, addr)
 
 				findInst.Destroy()
 				pool.Release(findSettings)
 				break
 			}
 		}
+		time.Sleep(time.Second)
 	}
 
 	defer recvInst.Destroy()
@@ -75,11 +80,22 @@ func main() {
 		log.Println("could not set tally")
 	}
 
-	for recvInst.GetNumConnections(1000) == 0 {
-		fmt.Println("connections..", recvInst.GetNumConnections(1000))
-	}
+	go func() {
+		for {
+			i, err := recvInst.GetNumConnections(1000)
+			if err != nil {
+				log.Println("Failed to get numconnections:", err)
+				return
+			}
+			if i != 0 {
+				fmt.Println("connections..", i)
+			}
+			time.Sleep(time.Second)
+		}
 
-	fmt.Println("Reading video...")
+	}()
+
+	fmt.Println("Reading NDI...")
 
 	for {
 		var (
@@ -92,23 +108,26 @@ func main() {
 		af.SetDefault()
 		mf.SetDefault()
 
-		ft, _ := recvInst.CaptureV2(nil, nil, nil, 1000)
+		ft := recvInst.CaptureV2(&vf, &af, &mf, 1000)
 		switch ft {
 		case ndi.FrameTypeNone:
-			fmt.Println("FrameTypeNone")
+			log.Println("FrameTypeNone")
 		case ndi.FrameTypeVideo:
-			fmt.Println("FrameTypeVideo")
+			log.Println("FrameTypeVideo")
+			log.Printf("VideoFrame : %#v\n", vf)
 			recvInst.FreeVideoV2(&vf)
 		case ndi.FrameTypeAudio:
-			fmt.Println("FrameTypeAudio")
+			log.Println("FrameTypeAudio")
+			log.Printf("AudioFrame : %#v\n", af)
 			recvInst.FreeAudioV2(&af)
 		case ndi.FrameTypeMetadata:
-			fmt.Println("FrameTypeMetadata")
+			log.Println("FrameTypeMetadata")
+			log.Printf("Metadata : %#v\n", mf)
 			recvInst.FreeMetadataV2(&mf)
 		case ndi.FrameTypeStatusChange:
-			fmt.Println("FrameTypeStatusChange")
+			log.Println("FrameTypeStatusChange")
 		default:
-			fmt.Println("Unknown frame type!")
+			log.Println("Unknown frame type!")
 		}
 	}
 }
