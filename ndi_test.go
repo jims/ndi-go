@@ -13,7 +13,7 @@ import (
 const ndiLibName = "Processing.NDI.Lib.x64.dll"
 
 func doInit(t *testing.T) {
-	libDir := os.Getenv("NDI_RUNTIME_DIR_V3")
+	libDir := os.Getenv("NDI_RUNTIME_DIR_V5")
 	if libDir == "" {
 		t.Fatal("ndi sdk is not installed")
 	}

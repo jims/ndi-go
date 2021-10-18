@@ -132,7 +132,7 @@ type VideoFrameV2 struct {
 	Timecode int64
 
 	//The video data itself.
-	Data *byte
+	Data []uint8
 
 	//The inter line stride of the video data, in bytes.
 	LineStride int32
